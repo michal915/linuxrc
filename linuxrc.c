@@ -288,6 +288,7 @@ void lxrc_change_root()
     "bin", "boot", "etc", "home", "lib", "run",
     "media", "mounts", "mounts/initrd", "mnt", "proc", "sbin",
     "sys", "tmp", "usr", "usr/lib", "usr/lib/microcode", "var",
+    "dev", "lib/modules", "lib/firmware", "parts",
     NULL
   };
 
@@ -301,6 +302,14 @@ void lxrc_change_root()
     (mp = config.url.instsys->mount)
   ) {
     fprintf(stderr, "starting rescue\n");
+
+    // create a separate file system
+    i = mount("tmpfs", mp, "tmpfs", 0, "size=0,nr_inodes=0");
+    if(i) {
+      fprintf(stderr, "rescue system setup failed\n");
+      LXRC_WAIT
+      return;
+    }
 
     // add dud images
     for(i = 0; i < config.update.ext_count; i++) {
@@ -320,15 +329,15 @@ void lxrc_change_root()
 
     // move module tree
     strprintf(&buf, "%s/lib/modules", mp);
-    rename("/lib/modules", buf);
+    mount("/lib/modules", buf, "none", MS_BIND|MS_REC, 0);
 
     // move firmware tree
     strprintf(&buf, "%s/lib/firmware", mp);
-    rename("/lib/firmware", buf);
+    mount("/lib/firmware", buf, "none", MS_BIND|MS_REC, 0);
 
     // move 'parts' tree
     strprintf(&buf, "%s/parts", mp);
-    rename("/parts", buf);
+    mount("/parts", buf, "none", MS_BIND|MS_REC, 0);
 
     // add devices
     strprintf(&buf, "%s/dev", mp);
@@ -339,12 +348,12 @@ void lxrc_change_root()
       mount("devtmpfs", buf, "devtmpfs", 0, 0);
     }
     else {
-      rename("/dev", buf);
+      mount("/dev", buf, "none", MS_BIND|MS_REC, 0);
     }
 
     // keep initrd available
     strprintf(&buf, "%s/mounts/initrd", mp);
-    mount("/", buf, "none", MS_BIND, 0);
+    mount("/", buf, "none", MS_BIND|MS_REC, 0);
 
     // add rescue images
     for(sl = config.url.instsys_list; sl; sl = sl->next) {
