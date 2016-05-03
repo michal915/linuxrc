@@ -773,6 +773,7 @@ void lxrc_init()
   config.net.ipv6 = 1;
   config.net.setup = NS_DHCP;	/* unless we are told otherwise just go for dhcp */
   config.net.nameservers = 1;
+  config.net.sethostname = 1;	/* let wicked set hostname */
 
   config.explode_win = 1;
   config.color = 2;

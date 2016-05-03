@@ -668,7 +668,10 @@ void file_do_info(file_t *f0, file_key_flag_t flags)
         break;
 
       case key_hostname:
-        if(*f->value) str_copy(&config.net.realhostname, f->value);
+        if(*f->value) {
+          str_copy(&config.net.realhostname, f->value);
+          sethostname(config.net.realhostname, strlen(config.net.realhostname));
+        }
         break;
 
       case key_netmask:
