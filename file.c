@@ -668,10 +668,7 @@ void file_do_info(file_t *f0, file_key_flag_t flags)
         break;
 
       case key_hostname:
-        if(*f->value) {
-          str_copy(&config.net.realhostname, f->value);
-          sethostname(config.net.realhostname, strlen(config.net.realhostname));
-        }
+        if(*f->value) str_copy(&config.net.realhostname, f->value);
         break;
 
       case key_netmask:
@@ -1897,13 +1894,6 @@ void file_write_install_inf(char *dir)
 
   if(config.net.realhostname) {
     file_write_str(f, key_hostname, config.net.realhostname);
-  }
-  else {
-    char buf[256];
-    if(!gethostname(buf, sizeof buf)) {
-      log_debug("hostname = \"%s\"\n", buf);
-      if(*buf && strcmp(buf, "(none)")) file_write_str(f, key_hostname, buf);
-    }
   }
 
   LXRC_WAIT

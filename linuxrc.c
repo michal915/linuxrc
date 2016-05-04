@@ -383,6 +383,9 @@ void lxrc_change_root()
     if(config.net.sshpassword) setenv("SSHPASSWORD", config.net.sshpassword, 1);
     if(config.net.sshpassword_enc) setenv("SSHPASSWORDENC", config.net.sshpassword_enc, 1);
 
+    /* change hostname from 'install' to 'rescue' unless we've had something better */
+    if(!config.net.realhostname) util_set_hostname("rescue");
+
     lxrc_run_console("/mounts/initrd/scripts/prepare_rescue");
 
     LXRC_WAIT
@@ -855,6 +858,8 @@ void lxrc_init()
 #if defined(__s390__) || defined(__s390x__)
   config.initrd_has_ldso = 1;
 #endif
+
+  util_set_hostname("install");
 
   // read config from initrd:
   //   - /linuxrc.config
